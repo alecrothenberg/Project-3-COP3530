@@ -1,18 +1,9 @@
-#include <unordered_map>
-#include <string>
+#include "Graph.h"
 
-class Graph {
-private:
-    std::unordered_map<std::string, int> actorNames;
+Graph::Graph(const int actors) {
+    adjMatrix [actors][actors];
     
-    int** adjMatrix;
-
-public:
-    Graph(int numActors);
 
 
 
-
-
-};
-
+}
