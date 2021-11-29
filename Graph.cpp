@@ -1,12 +1,24 @@
-#include "Graph.h"
+#include <unordered_map>
+#include <string>
 #include <vector>
+#include <iostream>
+#include <curl/curl.h>
 
-Graph::Graph(int actors) {
-    // need to intialize the 2D array to contain all 0's to start
-    
-    for (int i = 0; i < actors; ++i) { // assigns every value to 0
-        adjMatrix.at(i).resize(actors, 0);
-    }
-    
-    
-}
+
+
+class Graph {
+private:
+    std::unordered_map<std::string, int> actorNames;
+
+    // use vectors to avoid the const declaration issue with arrays
+    std::vector<std::vector<int>> adjMatrix;//(rows, std::vector<int>(cols, 0));
+
+public:
+    Graph(int numActors);
+
+
+
+
+
+};
+
