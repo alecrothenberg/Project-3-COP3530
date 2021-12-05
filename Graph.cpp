@@ -1,8 +1,64 @@
-#include "Graph.h"
+#include "graphShell.h"
 #include <vector>
 #include <iostream>
 #include <unordered_map>
+#include <sstream>
+#include <fstream>
 #pragma once
+
+
+
+// write function that based on a csv file that has end lines at end of every cast
+// assign each cast member an index in the map
+// pass in the index as well
+// push entire cast into a local vector and iterate through the cast vector
+// for every cast member have a secodn vector to iterate through the cast again and place edges in the corresponding indexes
+// write seperate function that iterates over the csv
+// first funciton just takes in a string line
+
+void Graph::assignCastEdges(std::string csvLine, int& index) {
+    
+    // get each cast members name
+    // parse csvLine and delete names and first comma
+
+    std::vector<std::string> castMembers;
+
+    while (csvLine.size() != 0) {
+        std::string castName;
+        int commaIndex = csvLine.find(',');
+        castName = csvLine.substr(0, commaIndex);
+        castMembers.push_back(castName);
+        if (adjList.count(castName) == 0) {
+            adjList[castName] = Node();
+            ++index;
+        }
+        
+        csvLine.erase(0, commaIndex + 1);
+    }
+
+    // insert edges
+    // iterate through cast members and add them to the nodes list of the actor at i
+
+
+
+
+    // double for loop iterating through the cast vector
+    for (int i = 0; i < castMembers.size(); ++i) {
+        std::string currentCast = castMembers.at(i);
+        for (int j = 0; j < castMembers.size(); ++j) {
+            if (currentCast == castMembers.at(j)) {
+                continue;
+            }
+            else
+                adjList[currentCast].edges[castMembers.at(j)]++;
+        }
+    }
+    
+    
+
+}
+
+
 
 void parseJS(std::string jsString, std::vector<std::string>& cast) {
     std::size_t found = jsString.find("name");
@@ -44,16 +100,16 @@ std::vector<std::string> getCast(std::string jsString) {
 //https://stackoverflow.com/questions/2329571/c-libcurl-get-output-into-a-string, by The Quantum Physicist
 size_t curlToString(void* data, size_t size, size_t nmemb, std::string* s) {
 
-    /*
-      Pretty sure this just prepares a C-style string and
-      adds data to it with append, nothing too crazy
-    */
+    
+      //Pretty sure this just prepares a C-style string and
+      //adds data to it with append, nothing too crazy
+    
     size_t newSize = size * nmemb;
 
-    /*
-      Not entirely sure if the try/catch is necessary,
-      but it works so I won't change it for now
-     */
+    
+      //Not entirely sure if the try/catch is necessary,
+      //but it works so I won't change it for now
+     
     try {
         s->append((char*)data, newSize);
     }
@@ -93,10 +149,7 @@ std::vector<std::string> apiCall(const char* apiAddress) {
         std::vector<std::string> movieCast = getCast(dataString);
 
         //Testing getCast
-        /*for (const auto& person : movieCast) {
-            std::cout << person << std::endl;
-        }
-        */
+        
         // Error check
         if (result != CURLE_OK) {
             std::cerr << "Error during curl request: "
@@ -123,34 +176,31 @@ std::unordered_map<std::string, int> actorMap() {
 
     std::unordered_map<std::string, int> actorsAndIndexes;
     int index = 0;
-    for (int i = 62; i < 5000; ++i) {
+    for (int i = 62; i < 67; ++i) {
         // string find returns start of movie/
         // add 5 to index of find to insert
-        std::string apiAddress = "https://api.themoviedb.org/3/movie//credits?api_key=c2cb38dac2b28f5c96780f1f9a396944";
-        int startofMovie = apiAddress.find("movie/");
+        std::string apiAddress = "https://api.themoviedb.org/3/movie/" + std::to_string(i) + "/credits?api_key=c2cb38dac2b28f5c96780f1f9a396944";
+        //int startofMovie = apiAddress.find("movie/");
         const char* API;
-        std::string iString = std::to_string(i);
+        //std::string iString = std::to_string(i);
         //apiAddress.erase(startofMovie + 6, iString.size());
-        apiAddress.insert(startofMovie + 6, iString);
+        //apiAddress.insert(startofMovie + 6, iString);
         API = apiAddress.c_str();
         
-        /*if (i == 62) {
-            apiAddress.insert(startofMovie + 6, iString);
-            API = apiAddress.c_str();
-        }
-        else if (iString.size() + 1 < 3) { // 62 - 99
-            apiAddress.erase(startofMovie + 6, iString.size());
-            apiAddress.insert(startofMovie + 6, iString);
-            API = apiAddress.c_str();
-        }
-        else if (iString.size() == 3 && )
-        */
-
         std::vector<std::string> vectOfActors = apiCall(API);
 
         for (int j = 0; j < vectOfActors.size(); ++j) {
             actorsAndIndexes[vectOfActors.at(j)] = index;
             ++index;
+        }
+        if (i == 100) {
+            std::cout << actorsAndIndexes.size() << std::endl;
+        }
+        else if (i == 1000) {
+            std::cout << actorsAndIndexes.size() << std::endl;
+        }
+        else if (i == 2000) {
+            std::cout << actorsAndIndexes.size() << std::endl;
         }
 
     }
@@ -161,14 +211,34 @@ std::unordered_map<std::string, int> actorMap() {
 
 
 
-Graph::Graph(int actors) {
+Graph::Graph() {
     // need to intialize the 2D array to contain all 0's to start
-    adjMatrix.resize(actors);
-    for (int i = 0; i < actors; ++i) { // assigns every value to 0
-        adjMatrix.at(i).resize(actors, 0);
-    }
 
-    std::unordered_map<std::string, int> test = actorMap();
+   // actorNames = actorMap();
+    //this->adjMatrix = new int[102775][102];
+    
+
+    std::ifstream casts("Moviecast_Data.csv");
+    std::string individualCast;
+    int index = 0;
+    while (getline(casts, individualCast)) {
+        assignCastEdges(individualCast, index);
+    }
+    //assignCastEdges("joe,shmoe,bob,rob,", index);
+    //assignCastEdges("bob,robert,shrumpert,", index);
+    //assignCastEdges("bob,joe,shrumpert,", index);
+    std::cout << adjList.size() << std::endl;
+    std::cout << "Resizing adjacency matrix..." << std::endl;
+
+    
+    //std::unordered_map<std::string, int> test = actorMap();
+
+   /* adjMatrix.resize(test.size());
+    for (int i = 0; i < test.size(); ++i) { // assigns every value to 0
+        adjMatrix.at(i).resize(test.size(), 0);
+    }
+    */
+    
 
     //apiCall("https://api.themoviedb.org/3/movie/63/credits?api_key=c2cb38dac2b28f5c96780f1f9a396944");
     // array is intialied 
@@ -177,4 +247,3 @@ Graph::Graph(int actors) {
     
 
 }
-
