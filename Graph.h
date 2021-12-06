@@ -3,6 +3,8 @@
 #include <vector>
 #include <iostream>
 #include <curl/curl.h>
+#include <sstream>
+#include <fstream>
 
 class Graph {
 private:
