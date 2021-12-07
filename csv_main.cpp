@@ -11,7 +11,7 @@ void parseJS(std::string jsString, std::string& cast){
 
         /*
          * Find first instance of "name", erase the
-         * rest so I can find the right " char after
+         * rest to find the right " char after
          * and start at the beginning of the name
         */
         jsString.erase(0, found + 7);
@@ -103,7 +103,6 @@ int main() {
 
             result = curl_easy_perform(curl);
 
-            //Fuck with us and then we tweakin hoe (tweakin hoe)
             std::string castString = getCast(dataString);
             if(!castString.empty()) {
                 file << getCast(dataString) << std::endl;
