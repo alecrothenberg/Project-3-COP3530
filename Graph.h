@@ -7,14 +7,15 @@
 #include <fstream>
 #include <iterator>
 #include <unordered_set>
+#include <set>
 
 class Graph {
 private:
 
-    
+
 
     std::unordered_map<std::string, int> indexes;
-    
+
 
     std::unordered_map<int, std::unordered_map<int, int>> adjList; // adj list of all the actor names and then the unordered map at each actor name contains each actor they share an edge with and its weight
     // weight is designated by how many movies theyve acted in togehter 
@@ -31,7 +32,7 @@ public:
     // write seperate function that iterates over the csv
     // first funciton just takes in a string line
 
-    
+
 
 
     void assignCastEdges(std::string csvLine, int& index) {
@@ -43,33 +44,18 @@ public:
         std::string castName;
         int random = std::rand() % 102775;
         while (csvLine.size() != 0) {
-            
+
             int commaIndex = csvLine.find(',');
             castName = csvLine.substr(0, commaIndex);
             castMembers.insert(castName);
             if (indexes.find(castName) == indexes.end()) {
                 indexes[castName] = index;
                 ++index;
-                
-                //auto itr = indexes.find(castName);
-                
             }
-            
-            //std::cout << castName << " " << index << std::endl;
+
             csvLine.erase(0, commaIndex + 1);
         }
-        //index += castMembers.size();
         
-        //for (auto itr : castMembers) {
-        //    indexes[itr] = index;
-        //    ++index;
-        //}
-
-        // insert edges
-        // iterate through cast members and add them to the nodes list of the actor at i
-
-
-        // double for loop iterating through the cast vector
 
         for (auto itr1 : castMembers) {
             int vertexFrom = indexes[itr1];
@@ -85,39 +71,22 @@ public:
                     adjList[vertexFrom][vertexTo]++;
             }
         }
-      
-
-       
-        //std::cout << index << std::endl;
     }
 
     Graph() {
-        
+
         std::ifstream casts("Moviecast_Data.csv");
         std::string individualCast;
         int index = 0;
-        //getline(casts, individualCast);
+        std::cout << "Creating Graph of Actors..." << std::endl;
+
         while (getline(casts, individualCast)) {
             assignCastEdges(individualCast, index);
         }
-        
-        std::cout << adjList.size() << std::endl;
-        std::cout << indexes.size() << std::endl;
-
-        //std::cout << indexes["Bruce Willis"] << std::endl;
-        //std::cout << adjList.find(indexes["Bruce Willis"])->first << std::endl;
-        //std::cout << indexes["Susan Dyson"] << std::endl;
-        //std::cout << adjList.find(indexes["Susan Dyson"])->first << std::endl;
-        std::cout << "Resizing adjacency matrix..." << std::endl;
 
 
-        
-
-
-      
     }
 
 
-
-
 };
+
