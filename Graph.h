@@ -8,6 +8,7 @@
 #include <iterator>
 #include <unordered_set>
 #include <set>
+#include <queue>
 
 class Graph {
 private:
@@ -17,7 +18,7 @@ private:
     std::unordered_map<std::string, int> indexes;
 
 
-    std::unordered_map<int, std::unordered_map<int, int>> adjList; // adj list of all the actor names and then the unordered map at each actor name contains each actor they share an edge with and its weight
+    std::unordered_map<int, std::vector<int>> adjList; // adj list of all the actor names and then the unordered map at each actor name contains each actor they share an edge with and its weight
     // weight is designated by how many movies theyve acted in togehter 
 
 
@@ -62,13 +63,13 @@ public:
             for (auto itr2 : castMembers) {
                 int vertexTo = indexes[itr2];
                 if (castMembers.size() == 1) {
-                    adjList[vertexFrom][vertexTo]++;
+                    adjList[vertexFrom].push_back(vertexTo);
                 }
                 else if (vertexFrom == vertexTo) {
                     continue;
                 }
                 else
-                    adjList[vertexFrom][vertexTo]++;
+                    adjList[vertexFrom].push_back(vertexTo);
             }
         }
     }
@@ -86,7 +87,26 @@ public:
 
 
     }
+    
+    /*int BFS(std::string from, std::string to) {
+
+        int fromIndex = indexes[from];
+        int toIndex = indexes[to];
+
+        std::set<int> visited;
+        std::queue<int> que;
+
+        visited.insert(fromIndex);
+        que.push(fromIndex);
+
+        while (!que.empty()) {
+            int u = q.front();
+            q.pop();
+            std::vector<>
+        }
 
 
+    }
+    */
 };
 
