@@ -88,7 +88,7 @@ public:
 
     }
     
-    /*int BFS(std::string from, std::string to) {
+    int BFS(std::string from, std::string to) {
 
         int fromIndex = indexes[from];
         int toIndex = indexes[to];
@@ -98,15 +98,27 @@ public:
 
         visited.insert(fromIndex);
         que.push(fromIndex);
-
+        int dist = 0;
         while (!que.empty()) {
-            int u = q.front();
-            q.pop();
-            std::vector<>
+            int u = que.front();
+            que.pop();
+            ++dist;
+            std::vector<int> neighbors = adjList[u];
+            for (int itr : neighbors) {
+                if (visited.count(itr) == 0) {
+                    visited.insert(itr);
+                    que.push(itr);
+                    
+                    if (itr == toIndex) {
+                        return dist;
+                    }
+                    
+                }
+            }
         }
 
-
+        return false;
     }
-    */
+    
 };
 
