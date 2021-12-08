@@ -113,18 +113,18 @@ public:
         else { return true; }
     }
 
-    std::vector<int> numNodes(std::vector<int> parents, int toIndex) {
+    std::vector<std::string> numNodes(std::vector<int> parents, int toIndex) {
         // take in the toIndex and work backwords to where the parent = - 1
         int numNodes = 0;
-        std::vector<int> indexesPassed;
+        std::vector<std::string> indexesPassed;
         while (parents.at(toIndex) != -1) {
-            indexesPassed.push_back(toIndex);
+            indexesPassed.push_back(reverseIndexes[toIndex]);
             toIndex = parents.at(toIndex);
         }
         return indexesPassed;
     }
 
-    int dijkstras(std::string from, std::string to) {
+    std::pair<int, std::vector<std::string>> dijkstras(std::string from, std::string to) {
     
 
         int fromIndex = indexes[from];
@@ -188,14 +188,10 @@ public:
                     arrParent.at(itr->first) = u;
                 }
                 if (itr->first == toIndex) {
-                    //int numOfNodes = 0;
-                    std::vector<int> nodePars = numNodes(arrParent, toIndex);
-                    int toReturn = nodePars.size();
-                    std::cout << from << std::endl;
-                    for (int i = toReturn - 1; i >= 0; --i) {
-                        std::cout << reverseIndexes[nodePars.at(i)] << std::endl;
-                    }
-                    
+                    std::vector<std::string> nodePars = numNodes(arrParent, toIndex);
+                    nodePars.push_back(from);
+                    int numTraversed = nodePars.size() - 2;
+                    std::pair<int, std::vector<std::string>> toReturn = std::make_pair(numTraversed, nodePars);
 
                     return toReturn;
                 }
@@ -206,10 +202,12 @@ public:
         }
 
 
-    
+        std::vector<std::string> bad = { "no connection" };
+        std::pair<int, std::vector<std::string>> badPair = std::make_pair(-1, bad);
+        return badPair;
     }
 
-    int BFS(std::string from, std::string to) {
+    std::pair<int, std::vector<std::string>> BFS(std::string from, std::string to) {
 
         int fromIndex = indexes[from];
         int toIndex = indexes[to];
@@ -233,25 +231,22 @@ public:
                     que.push(itr.first);
                     parents.at(itr.first) = u;
                     if (itr.first == toIndex) {
-                        //int numOfNodes = 0;
-                        std::vector<int> nodePars = numNodes(parents, toIndex);
-                        int toReturn = nodePars.size();
-                        std:: cout << from << std::endl;
-                        for (int i = toReturn - 1; i >= 0; --i) {
-                            std::cout << reverseIndexes[nodePars.at(i)] << std::endl;
-                        }
-                        
+                        std::vector<std::string> nodePars = numNodes(parents, toIndex);
+                        nodePars.push_back(from);
+                        int numTraversed = nodePars.size() - 2;
+                        std::pair<int, std::vector<std::string>> toReturn = std::make_pair(numTraversed, nodePars);
 
                         return toReturn;
                     }
                 }
             }
         }
-
-        return -1;
+        std::vector<std::string> bad = { "no connection" };
+        std::pair<int, std::vector<std::string>> badPair = std::make_pair(-1, bad);
+        return badPair;
     }
 
-    int DFS(std::string from, std::string to) {
+    std::pair<int, std::vector<std::string>> DFS(std::string from, std::string to) {
 
         int fromIndex = indexes[from];
         int toIndex = indexes[to];
@@ -275,23 +270,19 @@ public:
                     sta.push(itr.first);
                     parents.at(itr.first) = u;
                     if (itr.first == toIndex) {
-                        //int numOfNodes = 0;
-                        std::vector<int> nodePars = numNodes(parents, toIndex);
-                        int toReturn = nodePars.size();
-                        std::cout << from << std::endl;
-                        for (int i = toReturn - 1; i >= 0; --i) {
-                            std::cout << reverseIndexes[nodePars.at(i)] << std::endl;
-                        }
-
-                        
+                        std::vector<std::string> nodePars = numNodes(parents, toIndex);
+                        nodePars.push_back(from);
+                        int numTraversed = nodePars.size() - 2;
+                        std::pair<int, std::vector<std::string>> toReturn = std::make_pair(numTraversed, nodePars);
 
                         return toReturn;
                     }
                 }
             }
         }
-
-        return -1;
+        std::vector<std::string> bad = { "no connection" };
+        std::pair<int, std::vector<std::string>> badPair = std::make_pair(-1, bad);
+        return badPair;
     }
 
 
