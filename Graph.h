@@ -104,45 +104,7 @@ public:
     }
 
     //Gonna need to change BFS to fit weighted map
-    int BFS(std::string from, std::string to) {
-
-        int fromIndex = indexes[from];
-        int toIndex = indexes[to];
-
-        std::set<int> visited;
-        std::queue<int> que;
-        std::vector<int> parents(adjList.size());
-        parents.at(fromIndex) = -1;
-
-        visited.insert(fromIndex);
-        que.push(fromIndex);
-        int dist = 0;
-        while (!que.empty()) {
-            int u = que.front();
-            que.pop();
-            //++dist;
-            std::unordered_map<int,int> neighbors = adjList[u];
-            for (auto itr : neighbors) {
-                if (visited.count(itr.first) == 0) {
-                    visited.insert(itr.first);
-                    que.push(itr.first);
-                    parents.at(itr.first) = u;
-                    if (itr.first == toIndex) {
-                        //int numOfNodes = 0;
-                        std::vector<int> nodePars = numNodes(parents, toIndex);
-                        int toReturn = nodePars.size();
-                        for (int i = 0; i < toReturn; ++i) {
-                            std::cout << reverseIndexes[nodePars.at(i)] << std::endl;
-                        }
-
-                        return toReturn;
-                    }
-                }
-            }
-        }
-
-        return -1;
-    }
+    
 
     bool stringValidation(std::string input) {
         if (indexes.count(input) == 0) {
@@ -229,10 +191,11 @@ public:
                     //int numOfNodes = 0;
                     std::vector<int> nodePars = numNodes(arrParent, toIndex);
                     int toReturn = nodePars.size();
-                    for (int i = 0; i < toReturn; ++i) {
+                    std::cout << from << std::endl;
+                    for (int i = toReturn - 1; i >= 0; --i) {
                         std::cout << reverseIndexes[nodePars.at(i)] << std::endl;
                     }
-
+                    
 
                     return toReturn;
                 }
@@ -246,6 +209,47 @@ public:
     
     }
 
+    int BFS(std::string from, std::string to) {
+
+        int fromIndex = indexes[from];
+        int toIndex = indexes[to];
+
+        std::set<int> visited;
+        std::queue<int> que;
+        std::vector<int> parents(adjList.size());
+        parents.at(fromIndex) = -1;
+
+        visited.insert(fromIndex);
+        que.push(fromIndex);
+        int dist = 0;
+        while (!que.empty()) {
+            int u = que.front();
+            que.pop();
+            //++dist;
+            std::unordered_map<int, int> neighbors = adjList[u];
+            for (auto itr : neighbors) {
+                if (visited.count(itr.first) == 0) {
+                    visited.insert(itr.first);
+                    que.push(itr.first);
+                    parents.at(itr.first) = u;
+                    if (itr.first == toIndex) {
+                        //int numOfNodes = 0;
+                        std::vector<int> nodePars = numNodes(parents, toIndex);
+                        int toReturn = nodePars.size();
+                        std:: cout << from << std::endl;
+                        for (int i = toReturn - 1; i >= 0; --i) {
+                            std::cout << reverseIndexes[nodePars.at(i)] << std::endl;
+                        }
+                        
+
+                        return toReturn;
+                    }
+                }
+            }
+        }
+
+        return -1;
+    }
 
     int DFS(std::string from, std::string to) {
 
@@ -274,9 +278,12 @@ public:
                         //int numOfNodes = 0;
                         std::vector<int> nodePars = numNodes(parents, toIndex);
                         int toReturn = nodePars.size();
-                        for (int i = 0; i < toReturn; ++i) {
+                        std::cout << from << std::endl;
+                        for (int i = toReturn - 1; i >= 0; --i) {
                             std::cout << reverseIndexes[nodePars.at(i)] << std::endl;
                         }
+
+                        
 
                         return toReturn;
                     }
