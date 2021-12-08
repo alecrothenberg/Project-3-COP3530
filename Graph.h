@@ -63,13 +63,24 @@ public:
             for (auto itr2 : castMembers) {
                 int vertexTo = indexes[itr2];
                 if (castMembers.size() == 1) {
-                    adjList[vertexFrom].push_back(vertexTo);
+                    if(adjList[vertexFrom][vertexTo] == 0){
+                        adjList[vertexFrom][vertexTo]++;
+                    }
+                    else{
+                        adjList[vertexFrom][vertexTo] *= (1.0 / 1.1);
+                    }
                 }
                 else if (vertexFrom == vertexTo) {
-                    continue;
+                    continue;//You're bad at C++
                 }
-                else
-                    adjList[vertexFrom].push_back(vertexTo);
+                else {
+                    if (adjList[vertexFrom][vertexTo] == 0) {
+                        adjList[vertexFrom][vertexTo]++;
+                    }
+                    else {
+                        adjList[vertexFrom][vertexTo] *= (1.0 / 1.1);
+                    }
+                }
             }
         }
     }
@@ -88,6 +99,7 @@ public:
 
     }
     
+    //Gonna need to change BFS to fit weighted map
     int BFS(std::string from, std::string to) {
 
         int fromIndex = indexes[from];
