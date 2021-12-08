@@ -18,7 +18,7 @@ private:
     std::unordered_map<std::string, int> indexes;
 
 
-    std::unordered_map<int, std::vector<int>> adjList; // adj list of all the actor names and then the unordered map at each actor name contains each actor they share an edge with and its weight
+    std::unordered_map<int, std::unordered_map<int, double>> adjList; // adj list of all the actor names and then the unordered map at each actor name contains each actor they share an edge with and its weight
     // weight is designated by how many movies theyve acted in togehter 
 
 
