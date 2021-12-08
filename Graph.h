@@ -120,5 +120,14 @@ public:
         return false;
     }
     
+    bool stringValidation(std::string input) {
+        if (indexes.count(input) == 0) {
+            return false;
+        }
+        else { return true; }
+    }
+
+
+
 };
 
