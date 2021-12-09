@@ -22,7 +22,7 @@ private:
     std::unordered_map<std::string, int> indexes;
     std::unordered_map<int, std::string> reverseIndexes;
 
-    std::unordered_map<int, std::unordered_map<int,int>> adjList; // adj list of all the actor names and then the unordered map at each actor name contains each actor they share an edge with and its weight
+    std::unordered_map<int, std::unordered_map<int, int>> adjList; // adj list of all the actor names and then the unordered map at each actor name contains each actor they share an edge with and its weight
     // weight is designated by how many movies theyve acted in togehter 
 
 
@@ -58,7 +58,7 @@ public:
                 reverseIndexes[index] = castName;
                 ++index;
             }
-            
+
 
             csvLine.erase(0, commaIndex + 1);
         }
@@ -101,13 +101,13 @@ public:
         while (getline(casts, individualCast)) {
             assignCastEdges(individualCast, index);
         }
-       
+
 
 
     }
 
     //Gonna need to change BFS to fit weighted map
-    
+
 
     bool stringValidation(std::string input) {
         if (indexes.count(input) == 0) {
@@ -174,20 +174,20 @@ public:
                 // if it has and edge set d[v] to weight
             }
         }
-        
-        while(!vMinS.empty()) {
+
+        while (!vMinS.empty()) {
 
             int u = *vMinS.begin();
             for (auto itr : vMinS) {
                 if (arrWeight[itr] < arrWeight[u]) {
-                    
+
                     u = itr;
                 }
             }
-            
+
             vMinS.erase(u);
             S.emplace(u);
-            
+
 
             // itr through the edges of u 
             // if weight u v + d[u] < d[v]
@@ -202,7 +202,7 @@ public:
                 if (itr->first == toIndex) {
                     auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
                     long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
-                    
+
                     std::vector<std::string> nodePars = numNodes(arrParent, toIndex);
                     int numTraversed;
                     if (nodePars.size() == 1) {
@@ -212,14 +212,14 @@ public:
                         numTraversed = nodePars.size() - 1;
 
                     nodePars.push_back(from);
-                    
+
                     std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDijk, numTraversed);
 
-                    std::pair<std::pair<long long, int> , std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
+                    std::pair<std::pair<long long, int>, std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
 
                     return toReturn;
                 }
-                
+
             }
 
 
@@ -299,7 +299,7 @@ public:
         return badPair;
     }
 
-    std::pair<std::pair<long long,int>, std::vector<std::string>> DFS(std::string from, std::string to) { // time and then node number
+    std::pair<std::pair<long long, int>, std::vector<std::string>> DFS(std::string from, std::string to) { // time and then node number
         auto startSearchDFS = std::chrono::high_resolution_clock::now();
 
         int fromIndex = indexes[from];
@@ -311,7 +311,7 @@ public:
             long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
             std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDFS, 0);
             std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
-            
+
             return same;
         }
 
@@ -364,6 +364,12 @@ public:
         return badPair;
     }
 
+
+    std::unordered_map<std::string, int> getNames() {
+        return this->indexes;
+    }
+
+    
 
 };
 
