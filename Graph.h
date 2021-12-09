@@ -366,7 +366,7 @@ public:
 
 
     std::unordered_map<std::string, int> getNames() {
-        return this->indexes;
+        return indexes;
     }
 
     
