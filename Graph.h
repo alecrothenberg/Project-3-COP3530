@@ -1,18 +1,8 @@
 #include <unordered_map>
 #include <string>
 #include <vector>
-#include <iostream>
-#include <curl/curl.h>
-#include <sstream>
-#include <fstream>
-#include <iterator>
-#include <unordered_set>
-#include <set>
-#include <queue>
-#include <stack>
-#include <chrono>
-#include <random>
-#include <stdlib.h>
+
+
 
 class Graph {
 private:
@@ -40,334 +30,27 @@ public:
 
 
 
-    void assignCastEdges(std::string csvLine, int& index) {
+    void assignCastEdges(std::string csvLine, int& index);
 
-        // get each cast members name
-        // parse csvLine and delete names and first comma
-
-        std::unordered_set<std::string> castMembers;
-        std::string castName;
-        int random = std::rand() % 102775;
-        while (csvLine.size() != 0) {
-
-            int commaIndex = csvLine.find(',');
-            castName = csvLine.substr(0, commaIndex);
-            castMembers.insert(castName);
-            if (indexes.find(castName) == indexes.end()) {
-                indexes[castName] = index;
-                reverseIndexes[index] = castName;
-                ++index;
-            }
-
-
-            csvLine.erase(0, commaIndex + 1);
-        }
-
-
-        for (auto itr1 : castMembers) {
-            int vertexFrom = indexes[itr1];
-            for (auto itr2 : castMembers) {
-                int vertexTo = indexes[itr2];
-                if (castMembers.size() == 1) {
-                    if (adjList[vertexFrom][vertexTo] == 0) {
-                        adjList[vertexFrom][vertexTo]++;
-                    }
-                    else {
-                        adjList[vertexFrom][vertexTo] *= (1.0 / 1.1);
-                    }
-                }
-                else if (vertexFrom == vertexTo) {
-                    continue;//You're bad at C++
-                }
-                else {
-                    if (adjList[vertexFrom][vertexTo] == 0) {
-                        adjList[vertexFrom][vertexTo]++;
-                    }
-                    else {
-                        adjList[vertexFrom][vertexTo] *= (1.0 / 1.1);
-                    }
-                }
-            }
-        }
-    }
-
-    Graph() {
-
-        std::ifstream casts("Moviecast_Data.csv");
-        std::string individualCast;
-        int index = 0;
-        std::cout << "Creating Graph of Actors..." << std::endl;
-
-        while (getline(casts, individualCast)) {
-            assignCastEdges(individualCast, index);
-        }
-
-
-
-    }
+    Graph();
 
     //Gonna need to change BFS to fit weighted map
 
 
-    bool stringValidation(std::string input) {
-        if (indexes.count(input) == 0) {
-            return false;
-        }
-        else { return true; }
-    }
+    bool stringValidation(std::string input);
+       
 
-    std::vector<std::string> numNodes(std::vector<int> parents, int toIndex) {
-        // take in the toIndex and work backwords to where the parent = - 1
-        int numNodes = 0;
-        std::vector<std::string> indexesPassed;
-        while (parents.at(toIndex) != -1) {
-            indexesPassed.push_back(reverseIndexes[toIndex]);
-            toIndex = parents.at(toIndex);
-        }
-        return indexesPassed;
-    }
+    std::vector<std::string> numNodes(std::vector<int> parents, int toIndex);
+        
 
-    std::pair<std::pair<long long, int>, std::vector<std::string>> dijkstras(std::string from, std::string to) {
-        auto startSearchDijk = std::chrono::high_resolution_clock::now();
-        int fromIndex = indexes[from];
-        int toIndex = indexes[to];
-
-        if (toIndex == fromIndex) {
-            std::vector<std::string> actor = { "Same Actor!" };
-            auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
-            long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
-            std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDijk, 0);
-            std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
-
-            return same;
-        }
-
-        std::set<int> S;
-        S.insert(fromIndex);
-        std::set<int> vMinS;
-        // array of the weights of each node to get to the source node
-        // array of the parents of the nodes at each index
-
-        std::vector <int> arrWeight(adjList.size());
-        std::vector <int> arrParent(adjList.size());
-        arrWeight.at(fromIndex) = 0;
-        arrParent.at(fromIndex) = -1;
+    std::pair<std::pair<long long, int>, std::vector<std::string>> dijkstras(std::string from, std::string to);
 
 
-        for (int i = 0; i < adjList.size(); ++i) {
-            if (i != fromIndex) {
-                arrWeight.at(i) = INT_MAX;
-            }
-        }
+    std::pair<std::pair<long long, int>, std::vector<std::string>> BFS(std::string from, std::string to);
 
-        for (int i = 0; i < adjList.size(); ++i) {
-            if (i == fromIndex) {
-                for (auto itr = adjList.at(fromIndex).begin(); itr != adjList.at(fromIndex).end(); ++itr) {
-                    arrWeight.at(itr->first) = itr->second;
-                    arrParent.at(itr->first) = fromIndex;
-                }
-            }
-            else {
-                vMinS.insert(i);
-                if (arrParent.at(i) != fromIndex) { arrParent.at(i) = -1; }
-                // iterate through vector of pairs at src
-                // if it has and edge set d[v] to weight
-            }
-        }
+    std::pair<std::pair<long long, int>, std::vector<std::string>> DFS(std::string from, std::string to);
 
-        while (!vMinS.empty()) {
-
-            int u = *vMinS.begin();
-            for (auto itr : vMinS) {
-                if (arrWeight[itr] < arrWeight[u]) {
-
-                    u = itr;
-                }
-            }
-
-            vMinS.erase(u);
-            S.emplace(u);
-
-
-            // itr through the edges of u 
-            // if weight u v + d[u] < d[v]
-            // d[v] = w(u,v) +d[u]
-            // parent = u
-
-            for (auto itr = adjList.at(u).begin(); itr != adjList.at(u).end(); ++itr) {
-                if (arrWeight.at(u) + itr->second < arrWeight.at(itr->first)) {
-                    arrWeight.at(itr->first) = arrWeight.at(u) + itr->second;
-                    arrParent.at(itr->first) = u;
-                }
-                if (itr->first == toIndex) {
-                    auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
-                    long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
-
-                    std::vector<std::string> nodePars = numNodes(arrParent, toIndex);
-                    int numTraversed;
-                    if (nodePars.size() == 1) {
-                        numTraversed = 1;
-                    }
-                    else
-                        numTraversed = nodePars.size() - 1;
-
-                    nodePars.push_back(from);
-
-                    std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDijk, numTraversed);
-
-                    std::pair<std::pair<long long, int>, std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
-
-                    return toReturn;
-                }
-
-            }
-
-
-        }
-
-        auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
-        long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
-        std::vector<std::string> bad = { "no connection" };
-        std::pair<long long, int> longTime = std::make_pair(microsecondsDijk, -1);
-        std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
-        return badPair;
-    }
-
-    std::pair<std::pair<long long, int>, std::vector<std::string>> BFS(std::string from, std::string to) {
-
-        auto startSearchBFS = std::chrono::high_resolution_clock::now();
-        int fromIndex = indexes[from];
-        int toIndex = indexes[to];
-
-        if (toIndex == fromIndex) {
-            std::vector<std::string> actor = { "Same Actor!" };
-            auto elapsedSearchBFS = std::chrono::high_resolution_clock::now() - startSearchBFS;
-            long long microsecondsBFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchBFS).count();
-            std::pair<long long, int> timeAndNum = std::make_pair(microsecondsBFS, 0);
-            std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
-
-            return same;
-        }
-
-
-        std::set<int> visited;
-        std::queue<int> que;
-        std::vector<int> parents(adjList.size());
-        parents.at(fromIndex) = -1;
-
-        visited.insert(fromIndex);
-        que.push(fromIndex);
-        int dist = 0;
-        while (!que.empty()) {
-            int u = que.front();
-            que.pop();
-            //++dist;
-            std::unordered_map<int, int> neighbors = adjList[u];
-            for (auto itr : neighbors) {
-                if (visited.count(itr.first) == 0) {
-                    visited.insert(itr.first);
-                    que.push(itr.first);
-                    parents.at(itr.first) = u;
-                    if (itr.first == toIndex) {
-                        auto elapsedSearchBFS = std::chrono::high_resolution_clock::now() - startSearchBFS;
-                        long long microsecondsBFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchBFS).count();
-
-                        std::vector<std::string> nodePars = numNodes(parents, toIndex);
-                        int numTraversed;
-                        if (nodePars.size() == 1) {
-                            numTraversed = 1;
-                        }
-                        else
-                            numTraversed = nodePars.size() - 1;
-
-                        nodePars.push_back(from);
-
-                        std::pair<long long, int> timeAndNum = std::make_pair(microsecondsBFS, numTraversed);
-
-                        std::pair<std::pair<long long, int>, std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
-
-                        return toReturn;
-                    }
-                }
-            }
-        }
-        auto elapsedSearchBFS = std::chrono::high_resolution_clock::now() - startSearchBFS;
-        long long microsecondsBFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchBFS).count();
-        std::vector<std::string> bad = { "no connection" };
-        std::pair<long long, int> longTime = std::make_pair(microsecondsBFS, -1);
-        std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
-        return badPair;
-    }
-
-    std::pair<std::pair<long long, int>, std::vector<std::string>> DFS(std::string from, std::string to) { // time and then node number
-        auto startSearchDFS = std::chrono::high_resolution_clock::now();
-
-        int fromIndex = indexes[from];
-        int toIndex = indexes[to];
-
-        if (toIndex == fromIndex) {
-            std::vector<std::string> actor = { "Same Actor!" };
-            auto elapsedSearchDFS = std::chrono::high_resolution_clock::now() - startSearchDFS;
-            long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
-            std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDFS, 0);
-            std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
-
-            return same;
-        }
-
-        std::set<int> visited;
-        std::stack<int> sta;
-        std::vector<int> parents(adjList.size());
-        parents.at(fromIndex) = -1;
-
-        visited.insert(fromIndex);
-        sta.push(fromIndex);
-        int dist = 0;
-        while (!sta.empty()) {
-            int u = sta.top();
-            sta.pop();
-            //++dist;
-            std::unordered_map<int, int> neighbors = adjList[u];
-            for (auto itr : neighbors) {
-                if (visited.count(itr.first) == 0) {
-                    visited.insert(itr.first);
-                    sta.push(itr.first);
-                    parents.at(itr.first) = u;
-                    if (itr.first == toIndex) {
-                        auto elapsedSearchDFS = std::chrono::high_resolution_clock::now() - startSearchDFS;
-                        long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
-
-                        std::vector<std::string> nodePars = numNodes(parents, toIndex);
-                        int numTraversed;
-                        if (nodePars.size() == 1) {
-                            numTraversed = 1;
-                        }
-                        else
-                            numTraversed = nodePars.size() - 1;
-
-                        nodePars.push_back(from);
-
-                        std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDFS, numTraversed);
-
-                        std::pair<std::pair<long long, int>, std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
-
-                        return toReturn;
-                    }
-                }
-            }
-        }
-        auto elapsedSearchDFS = std::chrono::high_resolution_clock::now() - startSearchDFS;
-        long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
-        std::vector<std::string> bad = { "no connection" };
-        std::pair<long long, int> longTime = std::make_pair(microsecondsDFS, -1);
-        std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
-        return badPair;
-    }
-
-
-    std::unordered_map<std::string, int> getNames() {
-        return indexes;
-    }
+    std::unordered_map<std::string, int> getNames();
 
     
 
