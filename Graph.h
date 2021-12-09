@@ -189,8 +189,18 @@ public:
                 }
                 if (itr->first == toIndex) {
                     std::vector<std::string> nodePars = numNodes(arrParent, toIndex);
+                    int numTraversed;
+                    if (nodePars.size() == 1) {
+                        numTraversed = 1;
+                    }
+                    else if (nodePars.size() == 0) {
+                        numTraversed = 0;
+                    }
+                    else
+                        numTraversed = nodePars.size() - 1;
+
                     nodePars.push_back(from);
-                    int numTraversed = nodePars.size() - 2;
+                    
                     std::pair<int, std::vector<std::string>> toReturn = std::make_pair(numTraversed, nodePars);
 
                     return toReturn;
@@ -212,6 +222,13 @@ public:
         int fromIndex = indexes[from];
         int toIndex = indexes[to];
 
+        if (toIndex == fromIndex) {
+            std::vector<std::string> actor = { "Same Actor!" };
+            std::pair<int, std::vector<std::string>> same = std::make_pair(0, actor);
+            return same;
+        }
+
+
         std::set<int> visited;
         std::queue<int> que;
         std::vector<int> parents(adjList.size());
@@ -232,8 +249,18 @@ public:
                     parents.at(itr.first) = u;
                     if (itr.first == toIndex) {
                         std::vector<std::string> nodePars = numNodes(parents, toIndex);
+                        int numTraversed;
+
+                        if (nodePars.size() == 1) {
+                            numTraversed = 1;
+                        }
+                        else if (nodePars.size() == 0) {
+                            numTraversed = 0;
+                        }
+                        else
+                            numTraversed = nodePars.size() - 1;
+
                         nodePars.push_back(from);
-                        int numTraversed = nodePars.size() - 2;
                         std::pair<int, std::vector<std::string>> toReturn = std::make_pair(numTraversed, nodePars);
 
                         return toReturn;
@@ -250,6 +277,12 @@ public:
 
         int fromIndex = indexes[from];
         int toIndex = indexes[to];
+
+        if (toIndex == fromIndex) {
+            std::vector<std::string> actor = { "Same Actor!" };
+            std::pair<int, std::vector<std::string>> same = std::make_pair(0, actor);
+            return same;
+        }
 
         std::set<int> visited;
         std::stack<int> sta;
@@ -271,8 +304,18 @@ public:
                     parents.at(itr.first) = u;
                     if (itr.first == toIndex) {
                         std::vector<std::string> nodePars = numNodes(parents, toIndex);
+                        int numTraversed;
+                        if (nodePars.size() == 1) {
+                            numTraversed = 1;
+                        }
+                        else if (nodePars.size() == 0) {
+                            numTraversed = 0;
+                        }
+                        else
+                            numTraversed = nodePars.size() - 1;
+
                         nodePars.push_back(from);
-                        int numTraversed = nodePars.size() - 2;
+
                         std::pair<int, std::vector<std::string>> toReturn = std::make_pair(numTraversed, nodePars);
 
                         return toReturn;
