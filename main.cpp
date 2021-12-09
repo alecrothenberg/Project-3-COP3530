@@ -5,11 +5,9 @@
 #include <wx/wx.h>
 #endif
 
-
 class App : public wxApp
 {
 public:
-    //Creates instance of a Frame for the app
     bool OnInit();
 };
 
@@ -20,16 +18,12 @@ public:
 
     void boxInput(wxKeyEvent& event);
 
-    //Button functionality
     void OnDijkstrasPush(wxCommandEvent& event);
     void OnBFSPush(wxCommandEvent& event);
     void OnDFSPush(wxCommandEvent& event);
-    
-    //Output aid
     static std::string stringOutput(const std::pair<std::pair<long long, int>,
             std::vector<std::string>>& data, const std::string& algName);
 
-    //Constructor organization
     void makeBoxes();
     void makeButtons();
 
@@ -51,7 +45,6 @@ private:
 wxDECLARE_EVENT_TABLE();
 };
 
-//Enumeration for the buttons, used in makeButtons()
 enum {
     ID_DIJKSTRAS = 1,
     ID_BFS = 2,
@@ -67,8 +60,10 @@ wxEND_EVENT_TABLE()
 
 //Creates instance of the App class
 wxIMPLEMENT_APP(App);
+// clang-format on
 
-//                           APP FUNCTIONS
+
+//App Functions
 bool App::OnInit()
 {
     Frame* frame = new Frame("Project 3", wxPoint(50, 50), wxSize(450, 250));
@@ -77,8 +72,7 @@ bool App::OnInit()
 }
 
 
-//                          FRAME FUNCTIONS
-
+//Frame Functions
 Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
@@ -100,10 +94,10 @@ Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size)
 
 //Assigns dropdown box data
 void Frame::makeBoxes() {
-    box1 = new wxComboBox(this, wxID_ANY, _T("Select One"), wxPoint(70, 50), wxDefaultSize,
+    box1 = new wxComboBox(this, wxID_ANY, _T("Source"), wxPoint(70, 50), wxDefaultSize,
                           0, NULL, wxTE_PROCESS_ENTER | wxTE_PROCESS_TAB);
     box1->GetEventHandler()->Connect(wxEVT_KEY_DOWN, wxKeyEventHandler(Frame::boxInput));
-    box2 = new wxComboBox(this, wxID_ANY, _T("Select Another"), wxPoint(220, 50), wxDefaultSize,
+    box2 = new wxComboBox(this, wxID_ANY, _T("Target"), wxPoint(220, 50), wxDefaultSize,
                           0, NULL, wxTE_PROCESS_ENTER | wxTE_PROCESS_TAB);
     box2->GetEventHandler()->Connect(wxEVT_KEY_DOWN, wxKeyEventHandler(Frame::boxInput));
 
@@ -207,10 +201,10 @@ void Frame::OnDFSPush(wxCommandEvent &event) {
     }
 }
 
-//Collects the traversal data and packages it with text
+//Collects the traversal data and packages it with some text
 std::string Frame::stringOutput(const std::pair<std::pair<long long, int>,
-    std::vector<std::string>>& data, const std::string& algName){
-    
+        std::vector<std::string>>& data, const std::string& algName){
+
     std::string message;
 
     if(data.first.second == -1){//Disconnected flag
@@ -220,19 +214,30 @@ std::string Frame::stringOutput(const std::pair<std::pair<long long, int>,
         message = "The people you have entered are the same person!";
     }
     else{
-        message = "Nodes that separate the cast or crew members in this traversal: " + std::to_string(data.first.second)
-                  + "\n The path found between cast and crew members with " + algName + ": \n";
 
-        //Adds names in path traversal to the string
-        for(int i = data.second.size() - 1; i >= 0; i--){
-            message += data.second[i];
-            if(i > 0){
-                message += "=>";
+        if((algName == "BFS" || algName == "DFS") && data.second.size() == 2){
+            message = "These people have worked together directly!";
+        }
+        else {
+            message = "";
+            if(algName == "Dijkstra's"){
+                message = "These actors might have worked together before. This is the path with the strongest connections between people.\n \n";
             }
+            message += "Nodes that separate the cast or crew members in this traversal: " +
+                      std::to_string(data.first.second)
+                      + " \n \n The path found between cast and crew members with " + algName + ": \n";
 
+            //Adds names in path traversal to the string
+            for (int i = data.second.size() - 1; i >= 0; i--) {
+                message += data.second[i];
+                if (i > 0) {
+                    message += "=>";
+                }
+
+            }
         }
 
-        message +=  "\n Algorithm runtime: " + std::to_string(data.first.first) + " microseconds";
+        message +=  "\n \n Algorithm runtime: " + std::to_string(data.first.first) + " microseconds";
 
     }
 
