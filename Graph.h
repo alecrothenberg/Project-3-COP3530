@@ -10,6 +10,9 @@
 #include <set>
 #include <queue>
 #include <stack>
+#include <chrono>
+#include <random>
+#include <stdlib.h>
 
 class Graph {
 private:
@@ -124,11 +127,20 @@ public:
         return indexesPassed;
     }
 
-    std::pair<int, std::vector<std::string>> dijkstras(std::string from, std::string to) {
-    
-
+    std::pair<std::pair<long long, int>, std::vector<std::string>> dijkstras(std::string from, std::string to) {
+        auto startSearchDijk = std::chrono::high_resolution_clock::now();
         int fromIndex = indexes[from];
         int toIndex = indexes[to];
+
+        if (toIndex == fromIndex) {
+            std::vector<std::string> actor = { "Same Actor!" };
+            auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
+            long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
+            std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDijk, 0);
+            std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
+
+            return same;
+        }
 
         std::set<int> S;
         S.insert(fromIndex);
@@ -188,20 +200,22 @@ public:
                     arrParent.at(itr->first) = u;
                 }
                 if (itr->first == toIndex) {
+                    auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
+                    long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
+                    
                     std::vector<std::string> nodePars = numNodes(arrParent, toIndex);
                     int numTraversed;
                     if (nodePars.size() == 1) {
                         numTraversed = 1;
-                    }
-                    else if (nodePars.size() == 0) {
-                        numTraversed = 0;
                     }
                     else
                         numTraversed = nodePars.size() - 1;
 
                     nodePars.push_back(from);
                     
-                    std::pair<int, std::vector<std::string>> toReturn = std::make_pair(numTraversed, nodePars);
+                    std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDijk, numTraversed);
+
+                    std::pair<std::pair<long long, int> , std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
 
                     return toReturn;
                 }
@@ -211,20 +225,27 @@ public:
 
         }
 
-
+        auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
+        long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
         std::vector<std::string> bad = { "no connection" };
-        std::pair<int, std::vector<std::string>> badPair = std::make_pair(-1, bad);
+        std::pair<long long, int> longTime = std::make_pair(microsecondsDijk, -1);
+        std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
         return badPair;
     }
 
-    std::pair<int, std::vector<std::string>> BFS(std::string from, std::string to) {
+    std::pair<std::pair<long long, int>, std::vector<std::string>> BFS(std::string from, std::string to) {
 
+        auto startSearchBFS = std::chrono::high_resolution_clock::now();
         int fromIndex = indexes[from];
         int toIndex = indexes[to];
 
         if (toIndex == fromIndex) {
             std::vector<std::string> actor = { "Same Actor!" };
-            std::pair<int, std::vector<std::string>> same = std::make_pair(0, actor);
+            auto elapsedSearchBFS = std::chrono::high_resolution_clock::now() - startSearchBFS;
+            long long microsecondsBFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchBFS).count();
+            std::pair<long long, int> timeAndNum = std::make_pair(microsecondsBFS, 0);
+            std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
+
             return same;
         }
 
@@ -248,39 +269,49 @@ public:
                     que.push(itr.first);
                     parents.at(itr.first) = u;
                     if (itr.first == toIndex) {
+                        auto elapsedSearchBFS = std::chrono::high_resolution_clock::now() - startSearchBFS;
+                        long long microsecondsBFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchBFS).count();
+
                         std::vector<std::string> nodePars = numNodes(parents, toIndex);
                         int numTraversed;
-
                         if (nodePars.size() == 1) {
                             numTraversed = 1;
-                        }
-                        else if (nodePars.size() == 0) {
-                            numTraversed = 0;
                         }
                         else
                             numTraversed = nodePars.size() - 1;
 
                         nodePars.push_back(from);
-                        std::pair<int, std::vector<std::string>> toReturn = std::make_pair(numTraversed, nodePars);
+
+                        std::pair<long long, int> timeAndNum = std::make_pair(microsecondsBFS, numTraversed);
+
+                        std::pair<std::pair<long long, int>, std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
 
                         return toReturn;
                     }
                 }
             }
         }
+        auto elapsedSearchBFS = std::chrono::high_resolution_clock::now() - startSearchBFS;
+        long long microsecondsBFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchBFS).count();
         std::vector<std::string> bad = { "no connection" };
-        std::pair<int, std::vector<std::string>> badPair = std::make_pair(-1, bad);
+        std::pair<long long, int> longTime = std::make_pair(microsecondsBFS, -1);
+        std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
         return badPair;
     }
 
-    std::pair<int, std::vector<std::string>> DFS(std::string from, std::string to) {
+    std::pair<std::pair<long long,int>, std::vector<std::string>> DFS(std::string from, std::string to) { // time and then node number
+        auto startSearchDFS = std::chrono::high_resolution_clock::now();
 
         int fromIndex = indexes[from];
         int toIndex = indexes[to];
 
         if (toIndex == fromIndex) {
             std::vector<std::string> actor = { "Same Actor!" };
-            std::pair<int, std::vector<std::string>> same = std::make_pair(0, actor);
+            auto elapsedSearchDFS = std::chrono::high_resolution_clock::now() - startSearchDFS;
+            long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
+            std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDFS, 0);
+            std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
+            
             return same;
         }
 
@@ -303,28 +334,33 @@ public:
                     sta.push(itr.first);
                     parents.at(itr.first) = u;
                     if (itr.first == toIndex) {
+                        auto elapsedSearchDFS = std::chrono::high_resolution_clock::now() - startSearchDFS;
+                        long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
+
                         std::vector<std::string> nodePars = numNodes(parents, toIndex);
                         int numTraversed;
                         if (nodePars.size() == 1) {
                             numTraversed = 1;
-                        }
-                        else if (nodePars.size() == 0) {
-                            numTraversed = 0;
                         }
                         else
                             numTraversed = nodePars.size() - 1;
 
                         nodePars.push_back(from);
 
-                        std::pair<int, std::vector<std::string>> toReturn = std::make_pair(numTraversed, nodePars);
+                        std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDFS, numTraversed);
+
+                        std::pair<std::pair<long long, int>, std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
 
                         return toReturn;
                     }
                 }
             }
         }
+        auto elapsedSearchDFS = std::chrono::high_resolution_clock::now() - startSearchDFS;
+        long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
         std::vector<std::string> bad = { "no connection" };
-        std::pair<int, std::vector<std::string>> badPair = std::make_pair(-1, bad);
+        std::pair<long long, int> longTime = std::make_pair(microsecondsDFS, -1);
+        std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
         return badPair;
     }
 
