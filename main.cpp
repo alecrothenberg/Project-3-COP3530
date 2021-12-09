@@ -77,7 +77,7 @@ Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
     auto menuFile = new wxMenu();
-    menuFile
+    
     //menuFile->Append(ID_Hello, "&Hello...\tCtrl-H",
     //                 "Help string show in status bar");
     //menuFile->AppendSeparator();
