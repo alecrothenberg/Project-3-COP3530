@@ -1,249 +1,344 @@
-#include "graphShell.h"
+#include <unordered_map>
+#include <string>
 #include <vector>
 #include <iostream>
-#include <unordered_map>
 #include <sstream>
 #include <fstream>
-#pragma once
+#include <iterator>
+#include <unordered_set>
+#include <set>
+#include <queue>
+#include <stack>
+#include <chrono>
+#include "Graph.h"
 
-
-
-// write function that based on a csv file that has end lines at end of every cast
-// assign each cast member an index in the map
-// pass in the index as well
-// push entire cast into a local vector and iterate through the cast vector
-// for every cast member have a secodn vector to iterate through the cast again and place edges in the corresponding indexes
-// write seperate function that iterates over the csv
-// first funciton just takes in a string line
 
 void Graph::assignCastEdges(std::string csvLine, int& index) {
     
     // get each cast members name
     // parse csvLine and delete names and first comma
 
-    std::vector<std::string> castMembers;
-
+    std::unordered_set<std::string> castMembers;
+    std::string castName;
+    int random = std::rand() % 102775;
     while (csvLine.size() != 0) {
-        std::string castName;
+
         int commaIndex = csvLine.find(',');
         castName = csvLine.substr(0, commaIndex);
-        castMembers.push_back(castName);
-        if (adjList.count(castName) == 0) {
-            adjList[castName] = Node();
+        castMembers.insert(castName);
+        if (indexes.find(castName) == indexes.end()) {
+            indexes[castName] = index;
+            reverseIndexes[index] = castName;
             ++index;
         }
-        
+
+
         csvLine.erase(0, commaIndex + 1);
     }
 
-    // insert edges
-    // iterate through cast members and add them to the nodes list of the actor at i
 
-
-
-
-    // double for loop iterating through the cast vector
-    for (int i = 0; i < castMembers.size(); ++i) {
-        std::string currentCast = castMembers.at(i);
-        for (int j = 0; j < castMembers.size(); ++j) {
-            if (currentCast == castMembers.at(j)) {
-                continue;
+    for (auto itr1 : castMembers) {
+        int vertexFrom = indexes[itr1];
+        for (auto itr2 : castMembers) {
+            int vertexTo = indexes[itr2];
+            if (castMembers.size() == 1) {
+                if (adjList[vertexFrom][vertexTo] == 0) {
+                    adjList[vertexFrom][vertexTo]++;
+                }
+                else {
+                    adjList[vertexFrom][vertexTo] *= (1.0 / 1.1);
+                }
             }
-            else
-                adjList[currentCast].edges[castMembers.at(j)]++;
+            else if (vertexFrom == vertexTo) {
+                continue;//You're bad at C++
+            }
+            else {
+                if (adjList[vertexFrom][vertexTo] == 0) {
+                    adjList[vertexFrom][vertexTo]++;
+                }
+                else {
+                    adjList[vertexFrom][vertexTo] *= (1.0 / 1.1);
+                }
+            }
         }
     }
-    
-    
-
 }
-
-
-
-void parseJS(std::string jsString, std::vector<std::string>& cast) {
-    std::size_t found = jsString.find("name");
-
-    if (found != std::string::npos) {
-
-        /*
-         * Find first instance of "name", erase the
-         * rest so I can find the right " char after
-         * and start at the beginning of the name
-        */
-        jsString.erase(0, found + 7);
-
-        //Find next " char that lies at the end of the name
-        found = jsString.find('\"');
-
-        cast.push_back(jsString.substr(0, found));
-
-        /*
-         * Get rid of content before name and up to
-         * "original_name" section so that find doesn't find it
-         */
-
-        jsString.erase(0, found + 15);
-        parseJS(jsString, cast);
-    }
-}
-
-
-std::vector<std::string> getCast(std::string jsString) {
-    std::vector<std::string> cast;
-
-    parseJS(jsString, cast);
-
-    return cast;
-}
-
-
-//https://stackoverflow.com/questions/2329571/c-libcurl-get-output-into-a-string, by The Quantum Physicist
-size_t curlToString(void* data, size_t size, size_t nmemb, std::string* s) {
-
-    
-      //Pretty sure this just prepares a C-style string and
-      //adds data to it with append, nothing too crazy
-    
-    size_t newSize = size * nmemb;
-
-    
-      //Not entirely sure if the try/catch is necessary,
-      //but it works so I won't change it for now
-     
-    try {
-        s->append((char*)data, newSize);
-    }
-    catch (std::bad_alloc& excpt) {
-        return 0;
-    }
-
-    return newSize;
-}
-
-
-// prints all the names
-// use this to return a vector using getCast and adjust the url every time 
-std::vector<std::string> apiCall(const char* apiAddress) {
-    //This would probably be in an API call function, but for now its just the main
-    CURL* curl;
-    CURLcode result;
-
-    curl_global_init(CURL_GLOBAL_DEFAULT);
-
-    curl = curl_easy_init();
-
-    if (curl) {
-        std::string dataString;
-        curl_easy_setopt(curl, CURLOPT_URL, apiAddress);
-
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); //only for https
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L); //only for https
-
-        //Prepping the curl data for the string and assigning output to dataString
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlToString);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, &dataString);
-
-        result = curl_easy_perform(curl);
-
-        //Fuck with us and then we tweakin hoe (tweakin hoe)
-        std::vector<std::string> movieCast = getCast(dataString);
-
-        //Testing getCast
-        
-        // Error check
-        if (result != CURLE_OK) {
-            std::cerr << "Error during curl request: "
-                << curl_easy_strerror(result) << std::endl;
-        }
-
-        curl_easy_cleanup(curl);
-        return movieCast;
-    }
-    else {
-        std::cerr << "Error initializing curl." << std::endl;
-    }
-
-    curl_global_cleanup();
-
-    
-
-}
-
-std::unordered_map<std::string, int> actorMap() {
-
-    //insert a number starting at 62 right after movie/
-    
-
-    std::unordered_map<std::string, int> actorsAndIndexes;
-    int index = 0;
-    for (int i = 62; i < 67; ++i) {
-        // string find returns start of movie/
-        // add 5 to index of find to insert
-        std::string apiAddress = "https://api.themoviedb.org/3/movie/" + std::to_string(i) + "/credits?api_key=c2cb38dac2b28f5c96780f1f9a396944";
-        //int startofMovie = apiAddress.find("movie/");
-        const char* API;
-        //std::string iString = std::to_string(i);
-        //apiAddress.erase(startofMovie + 6, iString.size());
-        //apiAddress.insert(startofMovie + 6, iString);
-        API = apiAddress.c_str();
-        
-        std::vector<std::string> vectOfActors = apiCall(API);
-
-        for (int j = 0; j < vectOfActors.size(); ++j) {
-            actorsAndIndexes[vectOfActors.at(j)] = index;
-            ++index;
-        }
-        if (i == 100) {
-            std::cout << actorsAndIndexes.size() << std::endl;
-        }
-        else if (i == 1000) {
-            std::cout << actorsAndIndexes.size() << std::endl;
-        }
-        else if (i == 2000) {
-            std::cout << actorsAndIndexes.size() << std::endl;
-        }
-
-    }
-    std::cout << actorsAndIndexes.size() << std::endl;
-    return actorsAndIndexes;
-}
-
-
-
 
 Graph::Graph() {
-    // need to intialize the 2D array to contain all 0's to start
 
-   // actorNames = actorMap();
-    //this->adjMatrix = new int[102775][102];
-    
-
-    std::ifstream casts("Moviecast_Data.csv");
+    std::ifstream casts("Moviecasts_50k.csv");
     std::string individualCast;
     int index = 0;
+   // std::cout << "Creating Graph of Actors..." << std::endl;
+
     while (getline(casts, individualCast)) {
-        assignCastEdges(individualCast, index);
+       assignCastEdges(individualCast, index);
+
     }
-    //assignCastEdges("joe,shmoe,bob,rob,", index);
-    //assignCastEdges("bob,robert,shrumpert,", index);
-    //assignCastEdges("bob,joe,shrumpert,", index);
-    std::cout << adjList.size() << std::endl;
-    std::cout << "Resizing adjacency matrix..." << std::endl;
-
     
-    //std::unordered_map<std::string, int> test = actorMap();
 
-   /* adjMatrix.resize(test.size());
-    for (int i = 0; i < test.size(); ++i) { // assigns every value to 0
-        adjMatrix.at(i).resize(test.size(), 0);
+
+
+}
+
+//Gonna need to change BFS to fit weighted map
+
+
+bool Graph::stringValidation(std::string input) {
+    if (indexes.count(input) == 0) {
+        return false;
     }
-    */
-    
+    else { return true; }
+}
 
-    //apiCall("https://api.themoviedb.org/3/movie/63/credits?api_key=c2cb38dac2b28f5c96780f1f9a396944");
-    // array is intialied 
-    // need to have a seperate function that places everything into the unordered map and assigns an index
-    // probably need to change the constructor to no int taken in
-    
+std::vector<std::string> Graph::numNodes(std::vector<int> parents, int toIndex) {
+    // take in the toIndex and work backwords to where the parent = - 1
+    int numNodes = 0;
+    std::vector<std::string> indexesPassed;
+    while (parents.at(toIndex) != -1) {
+        indexesPassed.push_back(reverseIndexes[toIndex]);
+        toIndex = parents.at(toIndex);
+    }
+    return indexesPassed;
+}
 
+std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::dijkstras(std::string from, std::string to) {
+    auto startSearchDijk = std::chrono::high_resolution_clock::now();
+    int fromIndex = indexes[from];
+    int toIndex = indexes[to];
+
+    if (toIndex == fromIndex) {
+        std::vector<std::string> actor = { "Same Actor!" };
+        auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
+        long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
+        std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDijk, 0);
+        std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
+
+        return same;
+    }
+
+    std::set<int> S;
+    S.insert(fromIndex);
+    std::set<int> vMinS;
+    // array of the weights of each node to get to the source node
+    // array of the parents of the nodes at each index
+
+    std::vector <int> arrWeight(adjList.size());
+    std::vector <int> arrParent(adjList.size());
+    arrWeight.at(fromIndex) = 0;
+    arrParent.at(fromIndex) = -1;
+
+
+    for (int i = 0; i < adjList.size(); ++i) {
+        if (i != fromIndex) {
+            arrWeight.at(i) = INT_MAX;
+        }
+    }
+
+    for (int i = 0; i < adjList.size(); ++i) {
+        if (i == fromIndex) {
+            for (auto itr = adjList.at(fromIndex).begin(); itr != adjList.at(fromIndex).end(); ++itr) {
+                arrWeight.at(itr->first) = itr->second;
+                arrParent.at(itr->first) = fromIndex;
+            }
+        }
+        else {
+            vMinS.insert(i);
+            if (arrParent.at(i) != fromIndex) { arrParent.at(i) = -1; }
+            // iterate through vector of pairs at src
+            // if it has and edge set d[v] to weight
+        }
+    }
+
+    while (!vMinS.empty()) {
+
+        int u = *vMinS.begin();
+        for (auto itr : vMinS) {
+            if (arrWeight[itr] < arrWeight[u]) {
+
+                u = itr;
+            }
+        }
+
+        vMinS.erase(u);
+        S.emplace(u);
+
+
+        // itr through the edges of u 
+        // if weight u v + d[u] < d[v]
+        // d[v] = w(u,v) +d[u]
+        // parent = u
+
+        for (auto itr = adjList.at(u).begin(); itr != adjList.at(u).end(); ++itr) {
+            if (arrWeight.at(u) + itr->second < arrWeight.at(itr->first)) {
+                arrWeight.at(itr->first) = arrWeight.at(u) + itr->second;
+                arrParent.at(itr->first) = u;
+            }
+            if (itr->first == toIndex) {
+                auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
+                long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
+
+                std::vector<std::string> nodePars = numNodes(arrParent, toIndex);
+                int numTraversed;
+                if (nodePars.size() == 1) {
+                    numTraversed = 1;
+                }
+                else
+                    numTraversed = nodePars.size() - 1;
+
+                nodePars.push_back(from);
+
+                std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDijk, numTraversed);
+
+                std::pair<std::pair<long long, int>, std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
+
+                return toReturn;
+            }
+
+        }
+
+
+    }
+
+    auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
+    long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
+    std::vector<std::string> bad = { "no connection" };
+    std::pair<long long, int> longTime = std::make_pair(microsecondsDijk, -1);
+    std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
+    return badPair;
+}
+
+std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::BFS(std::string from, std::string to) {
+
+    auto startSearchBFS = std::chrono::high_resolution_clock::now();
+    int fromIndex = indexes[from];
+    int toIndex = indexes[to];
+
+    if (toIndex == fromIndex) {
+        std::vector<std::string> actor = { "Same Actor!" };
+        auto elapsedSearchBFS = std::chrono::high_resolution_clock::now() - startSearchBFS;
+        long long microsecondsBFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchBFS).count();
+        std::pair<long long, int> timeAndNum = std::make_pair(microsecondsBFS, 0);
+        std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
+
+        return same;
+    }
+
+
+    std::set<int> visited;
+    std::queue<int> que;
+    std::vector<int> parents(adjList.size());
+    parents.at(fromIndex) = -1;
+
+    visited.insert(fromIndex);
+    que.push(fromIndex);
+    int dist = 0;
+    while (!que.empty()) {
+        int u = que.front();
+        que.pop();
+        //++dist;
+        std::unordered_map<int, int> neighbors = adjList[u];
+        for (auto itr : neighbors) {
+            if (visited.count(itr.first) == 0) {
+                visited.insert(itr.first);
+                que.push(itr.first);
+                parents.at(itr.first) = u;
+                if (itr.first == toIndex) {
+                    auto elapsedSearchBFS = std::chrono::high_resolution_clock::now() - startSearchBFS;
+                    long long microsecondsBFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchBFS).count();
+
+                    std::vector<std::string> nodePars = numNodes(parents, toIndex);
+                    int numTraversed;
+                    if (nodePars.size() == 1) {
+                        numTraversed = 1;
+                    }
+                    else
+                        numTraversed = nodePars.size() - 1;
+
+                    nodePars.push_back(from);
+
+                    std::pair<long long, int> timeAndNum = std::make_pair(microsecondsBFS, numTraversed);
+
+                    std::pair<std::pair<long long, int>, std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
+
+                    return toReturn;
+                }
+            }
+        }
+    }
+    auto elapsedSearchBFS = std::chrono::high_resolution_clock::now() - startSearchBFS;
+    long long microsecondsBFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchBFS).count();
+    std::vector<std::string> bad = { "no connection" };
+    std::pair<long long, int> longTime = std::make_pair(microsecondsBFS, -1);
+    std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
+    return badPair;
+}
+
+std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::DFS(std::string from, std::string to) { // time and then node number
+    auto startSearchDFS = std::chrono::high_resolution_clock::now();
+
+    int fromIndex = indexes[from];
+    int toIndex = indexes[to];
+
+    if (toIndex == fromIndex) {
+        std::vector<std::string> actor = { "Same Actor!" };
+        auto elapsedSearchDFS = std::chrono::high_resolution_clock::now() - startSearchDFS;
+        long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
+        std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDFS, 0);
+        std::pair<std::pair<long long, int>, std::vector<std::string>> same = std::make_pair(timeAndNum, actor);
+
+        return same;
+    }
+
+    std::set<int> visited;
+    std::stack<int> sta;
+    std::vector<int> parents(adjList.size());
+    parents.at(fromIndex) = -1;
+
+    visited.insert(fromIndex);
+    sta.push(fromIndex);
+    int dist = 0;
+    while (!sta.empty()) {
+        int u = sta.top();
+        sta.pop();
+        //++dist;
+        std::unordered_map<int, int> neighbors = adjList[u];
+        for (auto itr : neighbors) {
+            if (visited.count(itr.first) == 0) {
+                visited.insert(itr.first);
+                sta.push(itr.first);
+                parents.at(itr.first) = u;
+                if (itr.first == toIndex) {
+                    auto elapsedSearchDFS = std::chrono::high_resolution_clock::now() - startSearchDFS;
+                    long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
+
+                    std::vector<std::string> nodePars = numNodes(parents, toIndex);
+                    int numTraversed;
+                    if (nodePars.size() == 1) {
+                        numTraversed = 1;
+                    }
+                    else
+                        numTraversed = nodePars.size() - 1;
+
+                    nodePars.push_back(from);
+
+                    std::pair<long long, int> timeAndNum = std::make_pair(microsecondsDFS, numTraversed);
+
+                    std::pair<std::pair<long long, int>, std::vector<std::string>> toReturn = std::make_pair(timeAndNum, nodePars);
+
+                    return toReturn;
+                }
+            }
+        }
+    }
+    auto elapsedSearchDFS = std::chrono::high_resolution_clock::now() - startSearchDFS;
+    long long microsecondsDFS = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDFS).count();
+    std::vector<std::string> bad = { "no connection" };
+    std::pair<long long, int> longTime = std::make_pair(microsecondsDFS, -1);
+    std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
+    return badPair;
+}
+
+std::unordered_map<std::string, int> Graph::getNames() {
+    return indexes;
 }
