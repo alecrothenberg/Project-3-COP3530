@@ -53,10 +53,6 @@ size_t curlToString(void* data, size_t size, size_t nmemb, std::string* s){
     */
     size_t newSize = size*nmemb;
 
-    /*
-      Not entirely sure if the try/catch is necessary,
-      but it works so I won't change it for now
-     */
     try{
         s->append((char*)data, newSize);
     }
@@ -72,7 +68,7 @@ int main() {
     std::ofstream file;
     file.open("/Users/lucaspereira/CLionProjects/CURL_Sandbox/Moviecast_Data.csv");
 
-    //This would probably be in an API call function, but for now its just the main
+    
     CURL* curl;
     CURLcode result;
 
@@ -82,6 +78,7 @@ int main() {
 
     if(curl){
 
+        //Loop that goes through (mostly) valid movie codes and increments them for the API call string
         for(int i = 62; i < 5000; i++) {
             std::string dataString;
             std::string apiAddress = "https://api.themoviedb.org/3/movie//credits?api_key=c2cb38dac2b28f5c96780f1f9a396944";
@@ -89,13 +86,10 @@ int main() {
             const char* API;
             std::string iString = std::to_string(i);
 
-            //apiAddress.erase(startofMovie + 6, iString.size());
             apiAddress.insert(startofMovie + 6, iString);
             API = apiAddress.c_str();
 
             curl_easy_setopt(curl, CURLOPT_URL, API);
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L); //only for https
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L); //only for https
 
             //Prepping the curl data for the string and assigning output to dataString
             curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curlToString);
@@ -104,17 +98,17 @@ int main() {
             result = curl_easy_perform(curl);
 
             std::string castString = getCast(dataString);
+            
+            //If the movie code doesn't exist, don't add it to the CSV (Prevents empty lines)
             if(!castString.empty()) {
                 file << getCast(dataString) << std::endl;
             }
         }
         std::cout << "Done" << std::endl;
 
-
-
-        // Error check
+        //Check if there were issues with the API call
         if (result != CURLE_OK) {
-            std::cerr << "Error during curl request: "
+            std::cerr << "Error during API call request"
                       << curl_easy_strerror(result) << std::endl;
         }
 
