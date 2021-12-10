@@ -60,10 +60,9 @@ wxEND_EVENT_TABLE()
 
 //Creates instance of the App class
 wxIMPLEMENT_APP(App);
-// clang-format on
 
 
-//App Functions
+//                  APP FUNCTIONS
 bool App::OnInit()
 {
     Frame* frame = new Frame("Project 3", wxPoint(50, 50), wxSize(450, 250));
@@ -72,7 +71,7 @@ bool App::OnInit()
 }
 
 
-//Frame Functions
+//                  FRAME FUNCTIONS
 Frame::Frame(const wxString& title, const wxPoint& pos, const wxSize& size)
         : wxFrame(NULL, wxID_ANY, title, pos, size)
 {
