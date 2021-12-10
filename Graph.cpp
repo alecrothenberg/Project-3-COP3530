@@ -42,17 +42,11 @@ void Graph::assignCastEdges(std::string csvLine, int& index) {
         for (auto itr2 : castMembers) {
             int vertexTo = indexes[itr2];
             if (castMembers.size() == 1) {
-                if (adjList[vertexFrom][vertexTo] == 0) {
-                    adjList[vertexFrom][vertexTo]++;
-                }
-                else {
-                    adjList[vertexFrom][vertexTo] *= (1.0 / 1.1);
-                }
+                //Create entry for person, but do not connect
+                adjList[vertexFrom];
             }
-            else if (vertexFrom == vertexTo) {
-                continue;//You're bad at C++
-            }
-            else {
+            else if (vertexFrom != vertexTo) {
+                //Creates and connects entry, increments edge if extant
                 if (adjList[vertexFrom][vertexTo] == 0) {
                     adjList[vertexFrom][vertexTo]++;
                 }
@@ -81,15 +75,6 @@ Graph::Graph() {
 
 }
 
-//Gonna need to change BFS to fit weighted map
-
-
-bool Graph::stringValidation(std::string input) {
-    if (indexes.count(input) == 0) {
-        return false;
-    }
-    else { return true; }
-}
 
 std::vector<std::string> Graph::numNodes(std::vector<int> parents, int toIndex) {
     // take in the toIndex and work backwords to where the parent = - 1
@@ -108,6 +93,7 @@ std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::dijkstras(
     int toIndex = indexes[to];
 
     if (toIndex == fromIndex) {
+        //Returns a the data package if the actor is found
         std::vector<std::string> actor = { "Same Actor!" };
         auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
         long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
@@ -200,6 +186,7 @@ std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::dijkstras(
 
     }
 
+    //Returns a data package with flags for a disconnection
     auto elapsedSearchDijk = std::chrono::high_resolution_clock::now() - startSearchDijk;
     long long microsecondsDijk = std::chrono::duration_cast<std::chrono::microseconds>(elapsedSearchDijk).count();
     std::vector<std::string> bad = { "no connection" };
@@ -207,6 +194,7 @@ std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::dijkstras(
     std::pair<std::pair<long long, int>, std::vector<std::string>> badPair = std::make_pair(longTime, bad);
     return badPair;
 }
+
 
 std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::BFS(std::string from, std::string to) {
 
@@ -224,7 +212,7 @@ std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::BFS(std::s
         return same;
     }
 
-
+    //Standard BFS search, uses queue to traverse a graph with a set to avoid previously visited vertices 
     std::set<int> visited;
     std::queue<int> que;
     std::vector<int> parents(adjList.size());
@@ -274,6 +262,7 @@ std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::BFS(std::s
     return badPair;
 }
 
+//Standard DFS with stack and visited set, similar to BFS
 std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::DFS(std::string from, std::string to) { // time and then node number
     auto startSearchDFS = std::chrono::high_resolution_clock::now();
 
@@ -339,6 +328,7 @@ std::pair<std::pair<long long, int>, std::vector<std::string>> Graph::DFS(std::s
     return badPair;
 }
 
+//Returns the indexes map to get name data for wxComboboxes
 std::unordered_map<std::string, int> Graph::getNames() {
     return indexes;
 }
